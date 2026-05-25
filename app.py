@@ -1,5 +1,4 @@
 import streamlit as st
-import tensorflow as tf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,24 +18,24 @@ st.set_page_config(
 # -----------------------------------------
 df = pd.read_csv("titanic_ann_model.csv")
 
-# Select Features
+# Features
 X = df[['Pclass', 'Age', 'Fare']]
 
-# Fill missing Age values
+# Fill missing age values
 X['Age'] = X['Age'].fillna(X['Age'].mean())
 
-# Target
-y = df['Survived']
-
-# -----------------------------------------
-# NORMALIZATION
-# -----------------------------------------
+# Normalize
 scaler = MinMaxScaler()
-
-X_scaled = scaler.fit_transform(X)
+scaler.fit(X)
 
 # -----------------------------------------
-# HEADER SECTION
+# SIGMOID FUNCTION
+# -----------------------------------------
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+# -----------------------------------------
+# HEADER
 # -----------------------------------------
 st.markdown("""
 <h1 style='text-align:center; color:#1E90FF;'>
@@ -51,20 +50,17 @@ Deep Learning Based Passenger Survival Prediction
 st.divider()
 
 # -----------------------------------------
-# PROJECT DESCRIPTION
+# DESCRIPTION
 # -----------------------------------------
 st.subheader("📘 Project Description")
 
 st.write("""
-This application predicts whether a passenger would survive during the Titanic disaster using an Artificial Neural Network (ANN).
-
-The system uses:
-- TensorFlow
-- Deep Learning
+This application predicts Titanic passenger survival using:
+- Artificial Neural Network (ANN)
 - Forward Propagation
 - Sigmoid Activation Function
 
-The model predicts passenger survival probability based on:
+The prediction is based on:
 - Passenger Class
 - Age
 - Fare
@@ -73,7 +69,7 @@ The model predicts passenger survival probability based on:
 st.divider()
 
 # -----------------------------------------
-# INPUT SECTION
+# INPUT FORM
 # -----------------------------------------
 st.subheader("🧾 Passenger Input Form")
 
@@ -102,19 +98,18 @@ with col3:
     )
 
 # -----------------------------------------
-# PREDICTION BUTTON
+# PREDICT BUTTON
 # -----------------------------------------
 if st.button("🔍 Predict Survival"):
 
-    # -----------------------------------------
-    # NORMALIZE INPUT
-    # -----------------------------------------
+    # Input dataframe
     input_data = pd.DataFrame({
         'Pclass': [pclass],
         'Age': [age],
         'Fare': [fare]
     })
 
+    # Normalize
     input_scaled = scaler.transform(input_data)
 
     x1 = input_scaled[0][0]
@@ -126,42 +121,31 @@ if st.button("🔍 Predict Survival"):
     # -----------------------------------------
 
     # Hidden Layer Weights
-    w1 = 0.11
-    w2 = 0.14
-    w3 = 0.17
-
-    w4 = 0.21
-    w5 = 0.24
-    w6 = 0.27
+    w1, w2, w3 = 0.11, 0.14, 0.17
+    w4, w5, w6 = 0.21, 0.24, 0.27
 
     # Biases
-    bh1 = 0.1
-    bh2 = 0.1
+    bh1, bh2 = 0.1, 0.1
 
-    # Hidden Layer Calculation
+    # Hidden Layer
     net_h1 = (x1*w1) + (x2*w2) + (x3*w3) + bh1
     net_h2 = (x1*w4) + (x2*w5) + (x3*w6) + bh2
 
-    # Activation
-    out_h1 = tf.sigmoid(net_h1).numpy()
-    out_h2 = tf.sigmoid(net_h2).numpy()
-
-    # Output Layer Weights
-    w7 = 0.31
-    w8 = 0.34
-
-    # Output Bias
-    bo = 0.1
+    out_h1 = sigmoid(net_h1)
+    out_h2 = sigmoid(net_h2)
 
     # Output Layer
+    w7, w8 = 0.31, 0.34
+    bo = 0.1
+
     net_o1 = (out_h1*w7) + (out_h2*w8) + bo
 
-    predicted_output = tf.sigmoid(net_o1).numpy()
+    predicted_output = sigmoid(net_o1)
 
     probability = float(predicted_output)
 
     # -----------------------------------------
-    # PREDICTION LOGIC
+    # PREDICTION
     # -----------------------------------------
     if probability > 0.5:
         result = "✅ Survived"
@@ -171,7 +155,7 @@ if st.button("🔍 Predict Survival"):
     confidence = probability * 100
 
     # -----------------------------------------
-    # OUTPUT SECTION
+    # OUTPUT
     # -----------------------------------------
     st.divider()
 
@@ -181,34 +165,34 @@ if st.button("🔍 Predict Survival"):
 
     with c1:
         st.metric(
-            label="Prediction Result",
-            value=result
+            "Prediction Result",
+            result
         )
 
     with c2:
         st.metric(
-            label="Survival Probability",
-            value=f"{probability:.4f}"
+            "Survival Probability",
+            f"{probability:.4f}"
         )
 
     with c3:
         st.metric(
-            label="Confidence Score",
-            value=f"{confidence:.2f}%"
+            "Confidence Score",
+            f"{confidence:.2f}%"
         )
 
     # -----------------------------------------
-    # MSE CALCULATION
+    # MSE
     # -----------------------------------------
     target = 1.0
 
-    mse = 0.5 * tf.square(target - predicted_output)
+    mse = 0.5 * ((target - predicted_output) ** 2)
 
     st.write("### Mean Squared Error")
-    st.write(float(mse.numpy()))
+    st.write(mse)
 
     # -----------------------------------------
-    # VISUALIZATION SECTION
+    # VISUALIZATION
     # -----------------------------------------
     st.divider()
 
@@ -244,6 +228,6 @@ st.divider()
 
 st.markdown("""
 <center>
-Developed using TensorFlow + Streamlit 🚀
+Developed using Streamlit + ANN 🚀
 </center>
 """, unsafe_allow_html=True)
