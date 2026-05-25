@@ -28,48 +28,37 @@ print(x1, x2, x3)
 print("Actual Target =", target)
 
 # ---------------- FORWARD PROPAGATION ----------------
-
 # Hidden layer weights
-w1, w2, w3 = 0.11, -0.14, 0.17
-w4, w5, w6 = -0.21, 0.24, -0.27
+w1, w2, w3 = -0.8, 0.2, -0.6
+w4, w5, w6 = 0.5, -0.7, 0.3
 
-# Bias
-bh1 = 0.1
-bh2 = 0.1
+bh1 = -0.3
+bh2 = 0.2
 
-# Hidden neuron calculations
+# Hidden Layer
 net_h1 = (x1*w1) + (x2*w2) + (x3*w3) + bh1
 net_h2 = (x1*w4) + (x2*w5) + (x3*w6) + bh2
 
 out_h1 = tf.sigmoid(net_h1)
 out_h2 = tf.sigmoid(net_h2)
 
-print("\nHidden Layer Outputs")
-print("h1 =", out_h1.numpy())
-print("h2 =", out_h2.numpy())
+print("Hidden Output h1 =", out_h1.numpy())
+print("Hidden Output h2 =", out_h2.numpy())
 
-# Output layer weights
-w7 = 0.31
-w8 = -0.34
-bo = 0.1
+# Output layer
+w7 = -1.2
+w8 = 1.1
+bo = -0.4
 
-# Output neuron
 net_o1 = (out_h1*w7) + (out_h2*w8) + bo
 
 out_o1 = tf.sigmoid(net_o1)
 
-prediction = out_o1.numpy()
+prediction = float(out_o1.numpy())
 
 print("\nPredicted Output =", prediction)
 
-# Final prediction
 if prediction >= 0.5:
-    print("Passenger Survived")
+    print("Prediction : Survived")
 else:
-    print("Passenger Did NOT Survive")
-
-# ---------------- ERROR CALCULATION ----------------
-
-mse = 0.5 * tf.square(target - prediction)
-
-print("\nMean Squared Error =", mse.numpy())
+    print("Prediction : Not Survived")
