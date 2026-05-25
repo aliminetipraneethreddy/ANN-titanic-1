@@ -1,95 +1,75 @@
 import pandas as pd
-df = pd.read_csv("titanic_ann_model.csv")
-df.head()
-
 import tensorflow as tf
-import math
+from sklearn.preprocessing import MinMaxScaler
 
+# Load dataset
+df = pd.read_csv("titanic_ann_model.csv")
+
+# Features and target
 X = df[['Pclass', 'Age', 'Fare']]
 y = df['Survived']
 
-print(X.head())
-print(y.head())
-
-from sklearn.preprocessing import MinMaxScaler
-
+# Normalize data
 scaler = MinMaxScaler()
-
 X_scaled = scaler.fit_transform(X)
 
-print(X_scaled[:5])
+# Select one passenger record
+index = 3     # change index to test different passengers
 
-x1 = X_scaled[0][0]
-x2 = X_scaled[0][1]
-x3 = X_scaled[0][2]
+x1 = X_scaled[index][0]
+x2 = X_scaled[index][1]
+x3 = X_scaled[index][2]
 
-target = y[0]
+target = y[index]
 
 print("Normalized Inputs:")
 print(x1, x2, x3)
 
-print("Target:", target)
+print("Actual Target =", target)
 
-import tensorflow as tf
+# ---------------- FORWARD PROPAGATION ----------------
 
-inputs = tf.constant([x1, x2, x3], dtype=tf.float32)
+# Hidden layer weights
+w1, w2, w3 = 0.11, -0.14, 0.17
+w4, w5, w6 = -0.21, 0.24, -0.27
 
-print(inputs)
-
-# Inputs
-x1 = 0.2     # Pclass
-x2 = 0.24    # Age
-x3 = 0.80    # Fare
-
-# Convert to tensor
-inputs = tf.constant([x1, x2, x3], dtype=tf.float32)
-
-print("Inputs =", inputs)
-
-# Hidden neuron h1 weights
-w1 = 0.11
-w2 = 0.14
-w3 = 0.17
-
-# Hidden neuron h2 weights
-w4 = 0.21
-w5 = 0.24
-w6 = 0.27
-
+# Bias
 bh1 = 0.1
 bh2 = 0.1
-net_h1 = (x1*w1) + (x2*w2) + (x3*w3) + bh1
 
-print("Net Input h1 =", net_h1)
+# Hidden neuron calculations
+net_h1 = (x1*w1) + (x2*w2) + (x3*w3) + bh1
 net_h2 = (x1*w4) + (x2*w5) + (x3*w6) + bh2
 
-print("Net Input h2 =", net_h2)
 out_h1 = tf.sigmoid(net_h1)
 out_h2 = tf.sigmoid(net_h2)
 
-print("Output h1 =", out_h1.numpy())
-print("Output h2 =", out_h2.numpy())
+print("\nHidden Layer Outputs")
+print("h1 =", out_h1.numpy())
+print("h2 =", out_h2.numpy())
 
+# Output layer weights
 w7 = 0.31
-w8 = 0.34
+w8 = -0.34
 bo = 0.1
+
+# Output neuron
 net_o1 = (out_h1*w7) + (out_h2*w8) + bo
 
-print("Net Input Output Neuron =", net_o1.numpy())
 out_o1 = tf.sigmoid(net_o1)
 
-print("Output =", out_o1.numpy())
+prediction = out_o1.numpy()
 
-import tensorflow as tf
+print("\nPredicted Output =", prediction)
 
-# Target Output
-target = 1.0
+# Final prediction
+if prediction >= 0.5:
+    print("Passenger Survived")
+else:
+    print("Passenger Did NOT Survive")
 
-# Predicted Output from forward propagation
-predicted_output = 0.645   # example value
+# ---------------- ERROR CALCULATION ----------------
 
-# Mean Squared Error
-mse = 0.5 * tf.square(target - predicted_output)
+mse = 0.5 * tf.square(target - prediction)
 
-print("Mean Squared Error =", mse.numpy())
-
+print("\nMean Squared Error =", mse.numpy())
